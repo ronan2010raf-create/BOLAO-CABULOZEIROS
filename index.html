@@ -24,7 +24,8 @@
 <script>
 const SUPABASE_URL="https://qpdbztjuwxwnkqbybvmd.supabase.co";
 const SUPABASE_KEY="sb_publishable_VGpSU5mHMEvp7w0mit8oag_EnBeNYlK";
-const supabaseClientReady=!!(window.supabase && window.supabase.createClient);\nconst supabase=supabaseClientReady?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
+const supabaseClientReady=!!(window.supabase && window.supabase.createClient);
+const supabase=supabaseClientReady?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
 let currentSession=null;
 const initialPlayers=[["CARLOS SILVA",46],["WAFLANDERSON",40],["DANIEL SOUZA",37],["GERSON",35],["JEOVANE",35],["JOÃO BATISTA",32],["RONÃ R.",32],["REGINALDO",31],["GILCELIO",29],["LUCAS HENRIQUE",28],["TIÃO",28],["BONECO",27],["ADRIANO",27],["DELEON",26],["FERNANDO",24],["ROMULO",24],["BELINA",23],["NETO",23],["RYAN",23],["VALTER",23],["DOUGLAS SANTOS",21],["LUIS PAULO",21],["RONALDO",20],["RONAN FRED...",20],["DANIEL SILVA",18],["GILCIMAR",18],["VANDER",18],["OSMAR",18],["EDMILSON",17],["RAFAEL",15],["RAMON",15],["VINICIUS",15],["JOÃO MARCELO",14],["ALISON PACHECO",12],["JHONATTAN",12],["ALYSSON BATISTA",9],["KAUÃ",6],["TIAGO",3],["YVISON",3],["LUCAS COSTA",0]];
 const KEY="bolao-cabulozeiros-v1";let state;
@@ -104,8 +105,7 @@ document.getElementById('signupBtn').onclick=async()=>{
   if(data.session)setAuthUI(data.session);
  }catch(err){status.textContent='Não foi possível conectar ao Supabase: '+(err.message||err)}
 };
-document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();setAuthUI(null)};
-supabase.auth.getSession().then(({data})=>setAuthUI(data.session));
-supabase.auth.onAuthStateChange((_event,session)=>{if(session!==currentSession)setAuthUI(session)});
+document.getElementById('logoutBtn').onclick=async()=>{if(supabase){await supabase.auth.signOut();setAuthUI(null)}};
+if(supabase){supabase.auth.getSession().then(({data})=>setAuthUI(data.session));supabase.auth.onAuthStateChange((_event,session)=>{if(session!==currentSession)setAuthUI(session)});}else{document.getElementById('authStatus').textContent='Erro ao carregar conexão Supabase. Atualize a página.';}
 document.getElementById('roundDate').value=new Date().toISOString().slice(0,10);
 </script></body></html>
