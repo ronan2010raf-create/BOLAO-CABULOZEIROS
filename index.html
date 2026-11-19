@@ -20,7 +20,7 @@
 <section id="round" class="tab hide"><div class="panel"><h2 class="section-title">Lançamento de rodada</h2><div class="grid"><div><label>Número da rodada</label><input id="roundNo" type="number" min="1" value="1"></div><div><label>Data</label><input id="roundDate" type="date"></div></div><p class="muted">Informe os pontos conquistados nesta rodada. Os valores serão somados ao total atual. Deixe 0 para quem não pontuou.</p><div id="roundInputs"></div><div class="actions"><button class="primary" id="saveRound">Salvar rodada</button></div></div><div class="panel"><h3 class="section-title">Histórico de rodadas</h3><div id="history" class="muted">Nenhuma rodada lançada.</div></div></section>
 <section id="people" class="tab hide"><div class="panel"><h2 class="section-title">Participantes</h2><div class="row"><input id="newName" placeholder="Nome do participante"><button class="primary" id="addPerson">Adicionar</button></div><p class="muted">Edite os nomes ou remova participantes.</p><div id="peopleList"></div></div></section>
 <section id="backup" class="tab hide"><div class="panel"><h2 class="section-title">Backup e restauração</h2><p>Exporte uma cópia dos participantes, pontuações e rodadas. Guarde o arquivo em local seguro.</p><div class="actions"><button class="primary" id="export">⬇ Exportar backup</button><label class="btn" for="importFile" style="margin:0">⬆ Importar backup</label><input id="importFile" class="hide" type="file" accept="application/json"></div><p class="muted">Esta versão salva os dados no navegador deste aparelho. Use o backup manual para transferi-los a outro aparelho. A sincronização online será configurada na próxima etapa.</p></div></section></div></main><div class="footer">BOLÃO CABULOZEIROS • Feito para acompanhar o bolão</div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 const SUPABASE_URL="https://qpdbztjuwxwnkqbybvmd.supabase.co";
 const SUPABASE_KEY="sb_publishable_VGpSU5mHMEvp7w0mit8oag_EnBeNYlK";
@@ -82,8 +82,28 @@ function setAuthUI(session){
  if(session){document.getElementById('authStatus').textContent='Conectado: '+session.user.email+' • carregando dados...';loadCloud().then(()=>{document.getElementById('authStatus').textContent='Conectado e sincronizado com a nuvem.'}).catch(e=>{document.getElementById('authStatus').textContent='Erro ao carregar banco: '+e.message})}
  else document.getElementById('authStatus').textContent='Entre para acessar o bolão e sincronizar seus aparelhos.';
 }
-document.getElementById('loginBtn').onclick=async()=>{let email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value;let {data,error}=await supabase.auth.signInWithPassword({email,password});if(error){document.getElementById('authStatus').textContent='Erro ao entrar: '+error.message;return}setAuthUI(data.session)};
-document.getElementById('signupBtn').onclick=async()=>{let email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value;if(password.length<6){document.getElementById('authStatus').textContent='Use uma senha com pelo menos 6 caracteres.';return}let {data,error}=await supabase.auth.signUp({email,password});if(error){document.getElementById('authStatus').textContent='Erro ao criar conta: '+error.message;return}document.getElementById('authStatus').textContent=data.session?'Conta criada. Você já está conectado.':'Conta criada. Confira seu e-mail para confirmar o cadastro e depois entre.';if(data.session)setAuthUI(data.session)};
+document.getElementById('loginBtn').onclick=async()=>{
+ const status=document.getElementById('authStatus');status.textContent='Verificando acesso...';
+ try{const email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value;
+ const {data,error}=await supabase.auth.signInWithPassword({email,password});
+ if(error){status.textContent='Erro ao entrar: '+error.message;return}setAuthUI(data.session);
+ }catch(err){status.textContent='Falha na conexão: '+(err.message||err)}
+};
+document.getElementById('signupBtn').onclick=async()=>{
+ const status=document.getElementById('authStatus');
+ const email=document.getElementById('authEmail').value.trim();
+ const password=document.getElementById('authPassword').value;
+ status.textContent='Enviando solicitação de cadastro...';
+ if(!window.supabase || !supabase.auth){status.textContent='Erro: biblioteca de conexão não carregou. Atualize a página em alguns instantes.';return}
+ if(!email || !document.getElementById('authEmail').checkValidity()){status.textContent='Digite um endereço de e-mail válido.';return}
+ if(password.length<6){status.textContent='Use uma senha com pelo menos 6 caracteres.';return}
+ try{
+  const {data,error}=await supabase.auth.signUp({email,password});
+  if(error){status.textContent='Erro ao criar conta: '+error.message;return}
+  status.textContent=data.session?'Conta criada. Você já está conectado.':'Conta criada! Confira sua caixa de entrada e spam para confirmar o e-mail. Depois volte e clique em Entrar.';
+  if(data.session)setAuthUI(data.session);
+ }catch(err){status.textContent='Não foi possível conectar ao Supabase: '+(err.message||err)}
+};
 document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();setAuthUI(null)};
 supabase.auth.getSession().then(({data})=>setAuthUI(data.session));
 supabase.auth.onAuthStateChange((_event,session)=>{if(session!==currentSession)setAuthUI(session)});
