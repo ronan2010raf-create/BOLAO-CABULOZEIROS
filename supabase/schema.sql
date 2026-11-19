@@ -45,3 +45,50 @@ using (true) with check (true);
 grant usage on schema public to authenticated;
 grant select, insert, update, delete on public.players, public.rounds, public.round_entries to authenticated;
 grant usage, select on all sequences in schema public to authenticated;
+
+
+-- Carga inicial dos 40 participantes. Executa apenas se a tabela estiver vazia.
+insert into public.players (name, points)
+select v.name, v.points from (values
+("CARLOS SILVA", 46),
+("WAFLANDERSON", 40),
+("DANIEL SOUZA", 37),
+("GERSON", 35),
+("JEOVANE", 35),
+("JOÃO BATISTA", 32),
+("RONÃ R.", 32),
+("REGINALDO", 31),
+("GILCELIO", 29),
+("LUCAS HENRIQUE", 28),
+("TIÃO", 28),
+("BONECO", 27),
+("ADRIANO", 27),
+("DELEON", 26),
+("FERNANDO", 24),
+("ROMULO", 24),
+("BELINA", 23),
+("NETO", 23),
+("RYAN", 23),
+("VALTER", 23),
+("DOUGLAS SANTOS", 21),
+("LUIS PAULO", 21),
+("RONALDO", 20),
+("RONAN FRED...", 20),
+("DANIEL SILVA", 18),
+("GILCIMAR", 18),
+("VANDER", 18),
+("OSMAR", 18),
+("EDMILSON", 17),
+("RAFAEL", 15),
+("RAMON", 15),
+("VINICIUS", 15),
+("JOÃO MARCELO", 14),
+("ALISON PACHECO", 12),
+("JHONATTAN", 12),
+("ALYSSON BATISTA", 9),
+("KAUÃ", 6),
+("TIAGO", 3),
+("YVISON", 3),
+("LUCAS COSTA", 0)
+) as v(name, points)
+where not exists (select 1 from public.players);
