@@ -1,0 +1,18 @@
+{
+  "name": "Bolão Cabulozeiros",
+  "short_name": "Cabulozeiros",
+  "description": "Classificação oficial do Bolão Cabulozeiros",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#061a35",
+  "theme_color": "#061a35",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
